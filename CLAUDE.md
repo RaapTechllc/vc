@@ -30,9 +30,11 @@ This ensures you're always using the latest stable version from the homebrew tap
 **For Claude Code sessions:** Simply use `bd` commands - the binary will be found automatically in `/opt/homebrew/bin/`.
 
 **AI Supervision Requirements:**
-- **`ANTHROPIC_API_KEY`**: Required for AI supervision (assessment and analysis)
-- Export the environment variable: `export ANTHROPIC_API_KEY=your-key-here`
-- Without this key, the executor will run without AI supervision (warnings will be logged)
+- **Authentication**: Required for AI supervision (assessment and analysis)
+- **Option 1 (OAuth)**: `export ANTHROPIC_OAUTH_TOKEN=your-oauth-token-here` (for Claude subscription users)
+- **Option 2 (API Key)**: `export ANTHROPIC_API_KEY=your-key-here` (traditional method)
+- If both are set, OAuth token takes precedence
+- Without authentication, the executor will run without AI supervision (warnings will be logged)
 - AI supervision can be explicitly disabled via config: `EnableAISupervision: false`
 
 **Debug Environment Variables:**

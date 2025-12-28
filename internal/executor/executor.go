@@ -654,14 +654,21 @@ func New(cfg *Config) (*Executor, error) {
 	// Initialize message generator for auto-commit (vc-136)
 	// Only if we have AI supervisor (need API client)
 	if e.supervisor != nil {
-		// Get Anthropic API key
-		apiKey := os.Getenv("ANTHROPIC_API_KEY")
-		if apiKey != "" {
+		// Get authentication token (OAuth token or API key)
+		var authToken string
+		if oauthToken := os.Getenv("ANTHROPIC_OAUTH_TOKEN"); oauthToken != "" {
+			authToken = oauthToken
+		} else if apiKey := os.Getenv("ANTHROPIC_API_KEY"); apiKey != "" {
+			authToken = apiKey
+		}
+		
+		if authToken != "" {
 			// Create Anthropic client for message generation (vc-35: using Haiku for cost efficiency)
-			client := anthropic.NewClient(option.WithAPIKey(apiKey))
+			// OAuth tokens work the same way as API keys (both are bearer tokens)
+			client := anthropic.NewClient(option.WithAPIKey(authToken))
 			e.messageGen = git.NewMessageGenerator(&client, ai.GetSimpleTaskModel())
 		} else {
-			fmt.Fprintf(os.Stderr, "Warning: ANTHROPIC_API_KEY not set (auto-commit message generation disabled)\n")
+			fmt.Fprintf(os.Stderr, "Warning: Neither ANTHROPIC_OAUTH_TOKEN nor ANTHROPIC_API_KEY is set (auto-commit message generation disabled)\n")
 		}
 	}
 

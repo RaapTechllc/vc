@@ -1129,10 +1129,16 @@ func (a *Agent) checkToolCallLimit(toolName string) error {
 // This is ZFC-compliant: AI makes the judgment, not arbitrary heuristics
 // Returns (stuck bool, reason string)
 func (a *Agent) checkAILoopDetection(ctx context.Context, recentCalls []string) (bool, string) {
-	// Check if API key is available (or if AI checks are disabled for testing)
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-	if apiKey == "" || os.Getenv("VC_DISABLE_AI_LOOP_DETECTION") != "" {
-		// No API key or disabled - skip AI check, rely on hard limits
+	// Check if authentication token is available (or if AI checks are disabled for testing)
+	var authToken string
+	if oauthToken := os.Getenv("ANTHROPIC_OAUTH_TOKEN"); oauthToken != "" {
+		authToken = oauthToken
+	} else if apiKey := os.Getenv("ANTHROPIC_API_KEY"); apiKey != "" {
+		authToken = apiKey
+	}
+	
+	if authToken == "" || os.Getenv("VC_DISABLE_AI_LOOP_DETECTION") != "" {
+		// No auth token or disabled - skip AI check, rely on hard limits
 		return false, ""
 	}
 
@@ -1180,7 +1186,8 @@ Only say stuck=true if you're confident (>0.8) this is a loop.`, summary)
 	checkCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	client := anthropic.NewClient(option.WithAPIKey(apiKey))
+	// OAuth tokens work the same way as API keys (both are bearer tokens)
+	client := anthropic.NewClient(option.WithAPIKey(authToken))
 
 	resp, err := client.Messages.New(checkCtx, anthropic.MessageNewParams{
 		Model:     anthropic.Model("claude-3-5-haiku-20241022"), // Haiku for speed/cost

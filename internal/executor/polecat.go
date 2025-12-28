@@ -120,9 +120,9 @@ func NewPolecatExecutor(cfg *PolecatConfig) (*PolecatExecutor, error) {
 		config: cfg,
 	}
 
-	// Initialize AI supervisor if API key is available
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-	if apiKey != "" {
+	// Initialize AI supervisor if authentication token is available (OAuth token or API key)
+	// NewSupervisor will handle checking for both ANTHROPIC_OAUTH_TOKEN and ANTHROPIC_API_KEY
+	if os.Getenv("ANTHROPIC_OAUTH_TOKEN") != "" || os.Getenv("ANTHROPIC_API_KEY") != "" {
 		supervisor, err := ai.NewSupervisor(&ai.Config{
 			Store: cfg.Store, // Can be nil in polecat mode
 		})

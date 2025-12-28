@@ -446,13 +446,42 @@ Example output:
 
 ## 🔑 AI Supervision Configuration
 
-**ANTHROPIC_API_KEY** (Required for AI supervision):
+VC supports two authentication methods for Claude API access:
+
+### Option 1: OAuth Token (Recommended for Subscription Users)
+
+If you have a Claude Pro or Max subscription, you can use OAuth authentication to leverage your monthly subscription instead of API keys:
+
 ```bash
-# Required for AI supervision (assessment and analysis)
+# Use your Claude subscription OAuth token
+export ANTHROPIC_OAUTH_TOKEN=your-oauth-token-here
+```
+
+**Benefits:**
+- Use your monthly subscription quota instead of paying per-token
+- Better rate limits for subscription users
+- No need to manage API keys separately
+
+**How to get your OAuth token:**
+- OAuth tokens are typically obtained through Claude's authentication flow
+- Check Claude's documentation for the latest OAuth setup instructions
+- Tokens are bearer tokens and work the same way as API keys
+
+### Option 2: API Key (Traditional Method)
+
+For users without subscriptions or who prefer API keys:
+
+```bash
+# Use API key authentication
 export ANTHROPIC_API_KEY=your-key-here
 ```
 
-Without this key, the executor will run without AI supervision (warnings will be logged).
+**Priority:**
+- If both `ANTHROPIC_OAUTH_TOKEN` and `ANTHROPIC_API_KEY` are set, OAuth token takes precedence
+- VC will automatically use whichever is available
+
+**Without authentication:**
+If neither is set, the executor will run without AI supervision (warnings will be logged).
 
 AI supervision can be explicitly disabled via config: `EnableAISupervision: false`
 

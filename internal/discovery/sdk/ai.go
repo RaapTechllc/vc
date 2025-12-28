@@ -58,10 +58,14 @@ type AIResponse struct {
 //
 //	fmt.Println(response.Text)
 func CallAI(ctx context.Context, req AIRequest) (*AIResponse, error) {
-	// Check for API key
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-	if apiKey == "" {
-		return nil, fmt.Errorf("ANTHROPIC_API_KEY environment variable not set")
+	// Check for authentication token (OAuth token or API key)
+	var authToken string
+	if oauthToken := os.Getenv("ANTHROPIC_OAUTH_TOKEN"); oauthToken != "" {
+		authToken = oauthToken
+	} else if apiKey := os.Getenv("ANTHROPIC_API_KEY"); apiKey != "" {
+		authToken = apiKey
+	} else {
+		return nil, fmt.Errorf("authentication required: set either ANTHROPIC_OAUTH_TOKEN (for subscriptions) or ANTHROPIC_API_KEY (for API keys)")
 	}
 
 	// Set defaults
@@ -78,8 +82,8 @@ func CallAI(ctx context.Context, req AIRequest) (*AIResponse, error) {
 		req.SystemPrompt = "You are an AI code quality assistant helping analyze code for potential issues."
 	}
 
-	// Create client
-	client := anthropic.NewClient(option.WithAPIKey(apiKey))
+	// Create client (OAuth tokens work the same way as API keys - both are bearer tokens)
+	client := anthropic.NewClient(option.WithAPIKey(authToken))
 
 	// Build messages
 	messages := []anthropic.MessageParam{

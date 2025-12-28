@@ -63,7 +63,11 @@ Loop {
 ## Quick Start
 
 ```bash
-# Set up environment
+# Set up environment (choose one):
+# Option 1: OAuth token (for Claude subscription users)
+export ANTHROPIC_OAUTH_TOKEN=your-oauth-token-here
+
+# Option 2: API key (traditional method)
 export ANTHROPIC_API_KEY=your-key-here
 
 # Build and run

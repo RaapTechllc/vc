@@ -12,6 +12,24 @@ import (
 	"github.com/steveyegge/vc/internal/types"
 )
 
+// getAuthToken retrieves authentication credentials from environment variables.
+// Supports both API keys (ANTHROPIC_API_KEY) and OAuth tokens (ANTHROPIC_OAUTH_TOKEN).
+// OAuth tokens from Claude subscriptions work the same way as API keys (both are bearer tokens).
+// Returns the token and an error if neither is set.
+func getAuthToken() (string, error) {
+	// Check for OAuth token first (for subscription users)
+	if oauthToken := os.Getenv("ANTHROPIC_OAUTH_TOKEN"); oauthToken != "" {
+		return oauthToken, nil
+	}
+	
+	// Fall back to API key (for API key users)
+	if apiKey := os.Getenv("ANTHROPIC_API_KEY"); apiKey != "" {
+		return apiKey, nil
+	}
+	
+	return "", fmt.Errorf("neither ANTHROPIC_OAUTH_TOKEN nor ANTHROPIC_API_KEY is set")
+}
+
 // checkBudget checks if we can proceed with an AI call within budget (vc-e3s7)
 // Returns an error if budget is exceeded
 func (s *Supervisor) checkBudget(issueID string) error {

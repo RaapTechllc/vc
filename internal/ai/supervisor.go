@@ -103,11 +103,13 @@ func NewSupervisor(cfg *Config) (*Supervisor, error) {
 		return nil, fmt.Errorf("storage is required")
 	}
 
-	apiKey := cfg.APIKey
-	if apiKey == "" {
-		apiKey = os.Getenv("ANTHROPIC_API_KEY")
-		if apiKey == "" {
-			return nil, fmt.Errorf("ANTHROPIC_API_KEY not set")
+	// Get authentication token (API key or OAuth token)
+	authToken := cfg.APIKey
+	if authToken == "" {
+		var err error
+		authToken, err = getAuthToken()
+		if err != nil {
+			return nil, fmt.Errorf("authentication required: set either ANTHROPIC_OAUTH_TOKEN (for subscriptions) or ANTHROPIC_API_KEY (for API keys)")
 		}
 	}
 
@@ -122,7 +124,8 @@ func NewSupervisor(cfg *Config) (*Supervisor, error) {
 		retry = DefaultRetryConfig()
 	}
 
-	client := anthropic.NewClient(option.WithAPIKey(apiKey))
+	// OAuth tokens work the same way as API keys (both are bearer tokens)
+	client := anthropic.NewClient(option.WithAPIKey(authToken))
 
 	// Initialize circuit breaker if enabled
 	var circuitBreaker *CircuitBreaker
