@@ -42,3 +42,4 @@ logs/
 .beads/*.sock*
 .envrc
 bd
+.env
